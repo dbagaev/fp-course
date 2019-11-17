@@ -36,8 +36,7 @@ instance Monad ExactlyOne where
     (a -> ExactlyOne b)
     -> ExactlyOne a
     -> ExactlyOne b
-  (=<<) =
-    error "todo: Course.Monad (=<<)#instance ExactlyOne"
+  (=<<) = bindExactlyOne
 
 -- | Binds a function on a List.
 --
@@ -48,8 +47,7 @@ instance Monad List where
     (a -> List b)
     -> List a
     -> List b
-  (=<<) =
-    error "todo: Course.Monad (=<<)#instance List"
+  (=<<) f_a_lb la = foldRight (\a r -> (++) (f_a_lb a) r) (Nil) la
 
 -- | Binds a function on an Optional.
 --
@@ -60,8 +58,7 @@ instance Monad Optional where
     (a -> Optional b)
     -> Optional a
     -> Optional b
-  (=<<) =
-    error "todo: Course.Monad (=<<)#instance Optional"
+  (=<<) = bindOptional
 
 -- | Binds a function on the reader ((->) t).
 --
@@ -72,8 +69,7 @@ instance Monad ((->) t) where
     (a -> ((->) t b))
     -> ((->) t a)
     -> ((->) t b)
-  (=<<) =
-    error "todo: Course.Monad (=<<)#instance ((->) t)"
+  (=<<) a_tb ta = \t -> a_tb (ta t) t
 
 -- | Witness that all things with (=<<) and (<$>) also have (<*>).
 --
@@ -111,8 +107,10 @@ instance Monad ((->) t) where
   k (a -> b)
   -> k a
   -> k b
-(<**>) =
-  error "todo: Course.Monad#(<**>)"
+-- (<**>) = (<*>)
+(<**>) k_fab ka = 
+  (\f -> f <$> ka) =<< k_fab
+
 
 infixl 4 <**>
 
@@ -133,8 +131,7 @@ join ::
   Monad k =>
   k (k a)
   -> k a
-join =
-  error "todo: Course.Monad#join"
+join = (=<<) id
 
 -- | Implement a flipped version of @(=<<)@, however, use only
 -- @join@ and @(<$>)@.
@@ -147,8 +144,7 @@ join =
   k a
   -> (a -> k b)
   -> k b
-(>>=) =
-  error "todo: Course.Monad#(>>=)"
+(>>=) ka f_a_kb = join (f_a_kb <$> ka)
 
 infixl 1 >>=
 
@@ -163,8 +159,8 @@ infixl 1 >>=
   -> (a -> k b)
   -> a
   -> k c
-(<=<) =
-  error "todo: Course.Monad#(<=<)"
+(<=<) b_kc a_kb a = 
+  b_kc =<< (a_kb a)
 
 infixr 1 <=<
 
