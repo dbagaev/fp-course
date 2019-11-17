@@ -102,10 +102,13 @@ monadTest =
 findMTest :: MiniTestTree
 findMTest =
   testGroup "findM" [
-    testCase "find 'c' in 'a'..'h'" $
+    testCase "find == 'c' in 'a'..'h'" $
       let p x = (\s -> const (pure (x == 'c')) =<< put (1+s)) =<< get
        in runState (findM p $ listh ['a'..'h']) 0 @?= (Full 'c',3)
-  , testCase "find 'i' in 'a'..'h'" $
+  , testCase "find >= 'c' in 'a'..'h'" $
+       let p x = (\s -> const (pure (x >= 'c')) =<< put (1+s)) =<< get
+        in runState (findM p $ listh ['a'..'h']) 0 @?= (Full 'c',3)
+  , testCase "find == 'i' in 'a'..'h'" $
       let p x = (\s -> const (pure (x == 'i')) =<< put (1+s)) =<< get
        in runState (findM p $ listh ['a'..'h']) 0 @?= (Empty,8)
   ]
